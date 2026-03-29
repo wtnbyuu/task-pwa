@@ -62,6 +62,7 @@ sendLinkBtn.addEventListener('click', async () => {
   try {
     await signInWithEmail(email)
     loginMessage.textContent = 'メールを確認してください。リンクをクリックするとログインできます。'
+    sendLinkBtn.disabled = false
   } catch (e) {
     loginMessage.textContent = 'エラー: ' + e.message
     sendLinkBtn.disabled = false
@@ -167,17 +168,17 @@ function renderTask(task) {
     }
   })
 
+  // タッチ操作: 長押しメニュー + スワイプ削除
   let longPressTimer
-  li.addEventListener('touchstart', () => {
-    longPressTimer = setTimeout(() => openContextMenu(task.id), 500)
-  })
-  li.addEventListener('touchend', () => clearTimeout(longPressTimer))
-  li.addEventListener('touchmove', () => clearTimeout(longPressTimer))
-
-  // スワイプ削除（左スワイプ）
   let touchStartX = 0
-  li.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX }, { passive: true })
+
+  li.addEventListener('touchstart', e => {
+    touchStartX = e.touches[0].clientX
+    longPressTimer = setTimeout(() => openContextMenu(task.id), 500)
+  }, { passive: true })
+
   li.addEventListener('touchend', async e => {
+    clearTimeout(longPressTimer)
     const dx = e.changedTouches[0].clientX - touchStartX
     if (dx < -80) {
       li.classList.add('swipe-delete')
@@ -188,6 +189,8 @@ function renderTask(task) {
       }, 200)
     }
   })
+
+  li.addEventListener('touchmove', () => clearTimeout(longPressTimer), { passive: true })
 
   return li
 }
@@ -264,10 +267,15 @@ ctxSubtask.addEventListener('click', () => {
 
 ctxDelete.addEventListener('click', async () => {
   if (!contextMenuTargetId) return
-  await deleteTask(contextMenuTargetId)
-  state.tasks = state.tasks.filter(t => t.id !== contextMenuTargetId)
-  renderTasks()
+  const id = contextMenuTargetId
   closeContextMenu()
+  try {
+    await deleteTask(id)
+    state.tasks = state.tasks.filter(t => t.id !== id)
+    renderTasks()
+  } catch (e) {
+    console.error('削除に失敗しました:', e)
+  }
 })
 
 ctxCancel.addEventListener('click', closeContextMenu)
