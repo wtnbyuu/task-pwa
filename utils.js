@@ -4,6 +4,7 @@
  * @returns {{ text: string, category: string|null }}
  */
 export function parseTag(raw) {
+  if (!raw) return { text: '', category: null }
   const match = raw.match(/#(\S+)/)
   const text = raw.replace(/#\S+/g, '').trim()
   return { text, category: match ? match[1] : null }
