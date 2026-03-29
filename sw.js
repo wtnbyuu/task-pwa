@@ -1,5 +1,13 @@
 const CACHE_NAME = 'task-pwa-v1'
-const ASSETS = ['/', '/index.html', '/app.js', '/utils.js', '/supabase.js', '/style.css', '/manifest.json']
+const ASSETS = [
+  '/task-pwa/',
+  '/task-pwa/index.html',
+  '/task-pwa/app.js',
+  '/task-pwa/utils.js',
+  '/task-pwa/supabase.js',
+  '/task-pwa/style.css',
+  '/task-pwa/manifest.json',
+]
 
 self.addEventListener('install', e => {
   e.waitUntil(
