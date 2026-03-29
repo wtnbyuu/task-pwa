@@ -9,7 +9,10 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
 /** Magic Linkをメールに送信 */
 export async function signInWithEmail(email) {
-  const { error } = await supabase.auth.signInWithOtp({ email })
+  const { error } = await supabase.auth.signInWithOtp({
+    email,
+    options: { emailRedirectTo: 'https://wtnbyuu.github.io/task-pwa/' },
+  })
   if (error) throw error
 }
 
