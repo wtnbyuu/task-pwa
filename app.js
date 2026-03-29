@@ -29,7 +29,7 @@ const ctxCancel = document.getElementById('ctx-cancel')
 // ===== 初期化 =====
 async function init() {
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js').catch(console.error)
+    navigator.serviceWorker.register('/task-pwa/sw.js').catch(console.error)
   }
 
   const session = await getSession()
@@ -157,7 +157,10 @@ function renderTask(task) {
   if (task.done) doneBtn.textContent = '✓'
   doneBtn.addEventListener('click', () => handleToggleDone(task))
 
-  menuBtn.addEventListener('click', () => openContextMenu(task.id))
+  menuBtn.addEventListener('click', e => {
+    e.stopPropagation()
+    openContextMenu(task.id)
+  })
 
   li.addEventListener('keydown', e => {
     if (e.key === 'Tab' && !e.shiftKey) {
