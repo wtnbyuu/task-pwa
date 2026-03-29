@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { parseTag, buildTree } from '../utils.js'
+import { parseTag, buildTree, filterTasks, getCategories } from '../utils.js'
 
 describe('parseTag', () => {
   it('タグなしの場合、textをそのまま返しcategoryはnull', () => {
@@ -48,5 +48,33 @@ describe('buildTree', () => {
     ]
     const result = buildTree(tasks)
     expect(result).toHaveLength(1)
+  })
+})
+
+describe('filterTasks', () => {
+  const tasks = [
+    { id: '1', text: 'A', category: '仕事' },
+    { id: '2', text: 'B', category: '個人' },
+    { id: '3', text: 'C', category: null },
+  ]
+
+  it('categoryがnullの場合は全タスクを返す', () => {
+    expect(filterTasks(tasks, null)).toHaveLength(3)
+  })
+
+  it('categoryが指定された場合は一致するタスクのみ返す', () => {
+    expect(filterTasks(tasks, '仕事')).toEqual([tasks[0]])
+  })
+})
+
+describe('getCategories', () => {
+  it('タスク一覧からユニークなカテゴリ一覧を返す（nullは除く）', () => {
+    const tasks = [
+      { category: '仕事' },
+      { category: '個人' },
+      { category: '仕事' },
+      { category: null },
+    ]
+    expect(getCategories(tasks)).toEqual(['仕事', '個人'])
   })
 })

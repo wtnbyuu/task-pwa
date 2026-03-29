@@ -29,3 +29,23 @@ export function buildTree(tasks) {
   })
   return roots
 }
+
+/**
+ * タスクをカテゴリでフィルタリングする
+ * @param {Array} tasks
+ * @param {string|null} category - nullの場合は全件返す
+ */
+export function filterTasks(tasks, category) {
+  if (!category) return tasks
+  return tasks.filter(t => t.category === category)
+}
+
+/**
+ * タスク一覧からユニークなカテゴリ一覧を返す
+ * @param {Array} tasks
+ * @returns {string[]}
+ */
+export function getCategories(tasks) {
+  const set = new Set(tasks.map(t => t.category).filter(Boolean))
+  return [...set]
+}
