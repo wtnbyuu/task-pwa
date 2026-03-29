@@ -1,0 +1,277 @@
+/* ===== リセット・ベース ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #ffffff;
+  --bg2: #f5f5f5;
+  --fg: #111111;
+  --fg2: #666666;
+  --accent: #4f46e5;
+  --done-fg: #aaaaaa;
+  --border: #e0e0e0;
+  --radius: 10px;
+  --tap: 44px; /* 最小タップターゲット */
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #111111;
+    --bg2: #1e1e1e;
+    --fg: #f0f0f0;
+    --fg2: #888888;
+    --accent: #818cf8;
+    --done-fg: #555555;
+    --border: #2a2a2a;
+  }
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+  min-height: 100dvh;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.hidden { display: none !important; }
+
+/* ===== ログイン画面 ===== */
+#login-screen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100dvh;
+  padding: 24px;
+}
+
+.login-box {
+  width: 100%;
+  max-width: 360px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.login-box h1 { font-size: 2rem; font-weight: 700; }
+
+.login-box input, .login-box button {
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: var(--radius);
+  border: 1.5px solid var(--border);
+  font-size: 1rem;
+  background: var(--bg2);
+  color: var(--fg);
+}
+
+.login-box button {
+  background: var(--accent);
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  min-height: var(--tap);
+}
+
+.message { font-size: 0.9rem; color: var(--fg2); min-height: 1.2em; }
+
+/* ===== ヘッダー・入力欄 ===== */
+header {
+  position: sticky;
+  top: 0;
+  background: var(--bg);
+  padding: env(safe-area-inset-top, 12px) 12px 8px;
+  border-bottom: 1px solid var(--border);
+  z-index: 10;
+}
+
+#input-area {
+  display: flex;
+  gap: 8px;
+}
+
+#task-input {
+  flex: 1;
+  padding: 10px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 1rem;
+  background: var(--bg2);
+  color: var(--fg);
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+#task-input:focus { border-color: var(--accent); }
+
+#add-btn {
+  width: var(--tap);
+  height: var(--tap);
+  border-radius: var(--radius);
+  border: none;
+  background: var(--accent);
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+/* ===== フィルターバー ===== */
+#filter-bar {
+  display: flex;
+  gap: 6px;
+  padding: 8px 12px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  border-bottom: 1px solid var(--border);
+}
+#filter-bar::-webkit-scrollbar { display: none; }
+
+.filter-btn {
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1.5px solid var(--border);
+  background: var(--bg2);
+  color: var(--fg2);
+  font-size: 0.875rem;
+  cursor: pointer;
+  white-space: nowrap;
+  min-height: var(--tap);
+}
+
+.filter-btn.active {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+
+/* ===== タスクコントロール ===== */
+#task-controls {
+  padding: 8px 12px;
+  font-size: 0.875rem;
+  color: var(--fg2);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ===== タスクリスト ===== */
+#task-list, .subtask-list {
+  list-style: none;
+}
+
+.task-item { border-bottom: 1px solid var(--border); }
+.subtask-list .task-item { border-bottom: none; }
+
+.task-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 12px;
+  min-height: var(--tap);
+}
+
+/* サブタスクはインデント */
+.subtask-list .task-row { padding-left: 36px; }
+
+.collapse-btn {
+  background: none;
+  border: none;
+  color: var(--fg2);
+  font-size: 0.7rem;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: transform 0.15s;
+  padding: 0;
+}
+
+.collapse-btn.expanded { transform: rotate(90deg); }
+.collapse-btn:empty, .collapse-btn[data-no-children] { visibility: hidden; }
+
+.done-btn {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  background: none;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.1s, border-color 0.1s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  color: white;
+}
+
+.task-item.done .done-btn {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.task-text {
+  flex: 1;
+  font-size: 1rem;
+  word-break: break-word;
+  padding: 10px 4px;
+}
+
+.task-item.done .task-text {
+  color: var(--done-fg);
+  text-decoration: line-through;
+}
+
+.menu-btn {
+  background: none;
+  border: none;
+  color: var(--fg2);
+  font-size: 1.2rem;
+  width: var(--tap);
+  height: var(--tap);
+  cursor: pointer;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ===== コンテキストメニュー ===== */
+#context-menu {
+  position: fixed;
+  bottom: env(safe-area-inset-bottom, 20px);
+  left: 12px;
+  right: 12px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  z-index: 100;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+}
+
+#context-menu button {
+  display: block;
+  width: 100%;
+  padding: 16px;
+  text-align: center;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  background: none;
+  color: var(--fg);
+  font-size: 1rem;
+  cursor: pointer;
+  min-height: var(--tap);
+}
+
+#context-menu button:last-child { border-bottom: none; }
+#ctx-delete { color: #ef4444; }
+#ctx-cancel { color: var(--fg2); }
+
+/* ===== スワイプ削除（タッチデバイス用の視覚フィードバック） ===== */
+.task-item.swipe-delete {
+  background: #ef4444;
+  transition: background 0.2s;
+}
