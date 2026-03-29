@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="タスク">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="style.css">
+  <title>タスク</title>
+</head>
+<body>
+
+  <!-- ログイン画面 -->
+  <div id="login-screen" class="screen hidden">
+    <div class="login-box">
+      <h1>タスク</h1>
+      <p>メールアドレスにMagic Linkを送ります</p>
+      <input id="email-input" type="email" placeholder="your@email.com" autocomplete="email">
+      <button id="send-link-btn">リンクを送る</button>
+      <p id="login-message" class="message"></p>
+    </div>
+  </div>
+
+  <!-- メイン画面 -->
+  <div id="app-screen" class="screen hidden">
+    <header>
+      <div id="input-area">
+        <input
+          id="task-input"
+          type="text"
+          placeholder="タスクを入力… (#カテゴリ)"
+          autocomplete="off"
+          autocorrect="off"
+        >
+        <button id="add-btn" aria-label="追加">+</button>
+      </div>
+    </header>
+
+    <nav id="filter-bar">
+      <button class="filter-btn active" data-category="">全て</button>
+    </nav>
+
+    <main>
+      <div id="task-controls">
+        <label>
+          <input type="checkbox" id="hide-done-toggle">
+          完了を非表示
+        </label>
+      </div>
+      <ul id="task-list"></ul>
+    </main>
+  </div>
+
+  <!-- タスクアイテムテンプレート（JS側でcloneして使う） -->
+  <template id="task-template">
+    <li class="task-item" data-id="">
+      <div class="task-row">
+        <button class="collapse-btn" aria-label="折りたたみ">▶</button>
+        <button class="done-btn" aria-label="完了"></button>
+        <span class="task-text"></span>
+        <button class="menu-btn" aria-label="メニュー">⋯</button>
+      </div>
+      <ul class="subtask-list"></ul>
+    </li>
+  </template>
+
+  <!-- 長押しメニュー（iPhone用） -->
+  <div id="context-menu" class="hidden">
+    <button id="ctx-subtask">サブタスクとして追加</button>
+    <button id="ctx-delete">削除</button>
+    <button id="ctx-cancel">キャンセル</button>
+  </div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
