@@ -9,3 +9,23 @@ export function parseTag(raw) {
   const text = raw.replace(/#\S+/g, '').trim()
   return { text, category: match ? match[1] : null }
 }
+
+/**
+ * フラットなタスク配列を親子ツリー構造に変換する
+ * @param {Array<{id: string, parent_id: string|null}>} tasks
+ * @returns {Array} ルートタスクの配列（各タスクにchildrenプロパティ付き）
+ */
+export function buildTree(tasks) {
+  const map = {}
+  tasks.forEach(t => { map[t.id] = { ...t, children: [] } })
+
+  const roots = []
+  tasks.forEach(t => {
+    if (t.parent_id && map[t.parent_id]) {
+      map[t.parent_id].children.push(map[t.id])
+    } else {
+      roots.push(map[t.id])
+    }
+  })
+  return roots
+}
