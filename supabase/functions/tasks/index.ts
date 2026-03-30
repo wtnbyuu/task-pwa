@@ -89,8 +89,10 @@ Deno.serve(async (req: Request) => {
       .eq('id', id)
       .select()
       .single()
-    if (error) return err(error.message, 500)
-    if (!data) return err('Task not found', 404)
+    if (error) {
+      if (error.code === 'PGRST116') return err('Task not found', 404)
+      return err(error.message, 500)
+    }
     return json(data)
   }
 
