@@ -1,10 +1,11 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
-const SERVICE_ROLE_KEY = Deno.env.get('API_KEY')!
+const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+const API_KEY = Deno.env.get('API_KEY')!
 const TASK_OWNER_USER_ID = Deno.env.get('TASK_OWNER_USER_ID')!
 
-const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY)
+const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
 
 function json(data: unknown, status = 200): Response {
   return new Response(JSON.stringify(data), {
@@ -23,7 +24,7 @@ function err(message: string, status: number): Response {
 Deno.serve(async (req: Request) => {
   // 認証チェック
   const auth = req.headers.get('Authorization')
-  if (!auth || auth !== `Bearer ${SERVICE_ROLE_KEY}`) {
+  if (!auth || auth !== `Bearer ${API_KEY}`) {
     return err('Unauthorized', 401)
   }
 
