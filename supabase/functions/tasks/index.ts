@@ -4,6 +4,8 @@ const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 const TASK_OWNER_USER_ID = Deno.env.get('TASK_OWNER_USER_ID')!
 
+const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY)
+
 function json(data: unknown, status = 200): Response {
   return new Response(JSON.stringify(data), {
     status,
@@ -29,8 +31,6 @@ Deno.serve(async (req: Request) => {
   // /functions/v1/tasks または /functions/v1/tasks/:id
   const lastSegment = url.pathname.split('/').filter(Boolean).pop()
   const id = lastSegment !== 'tasks' ? lastSegment : undefined
-
-  const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY)
 
   // GET /tasks — 全件取得
   if (req.method === 'GET') {
@@ -100,12 +100,15 @@ Deno.serve(async (req: Request) => {
   if (req.method === 'DELETE') {
     if (!id) return err('id is required', 400)
     // 存在チェック
-    const { data: existing } = await supabase
+    const { data: existing, error: selectError } = await supabase
       .from('tasks')
       .select('id')
       .eq('id', id)
       .single()
-    if (!existing) return err('Task not found', 404)
+    if (selectError) {
+      if (selectError.code === 'PGRST116') return err('Task not found', 404)
+      return err(selectError.message, 500)
+    }
 
     const { error } = await supabase.from('tasks').delete().eq('id', id)
     if (error) return err(error.message, 500)
