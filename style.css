@@ -275,3 +275,23 @@ header {
   background: #ef4444;
   transition: background 0.2s;
 }
+
+/* ===== ドラッグハンドル ===== */
+.drag-handle {
+  color: var(--fg2);
+  font-size: 1rem;
+  width: 20px;
+  cursor: grab;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: none;
+  user-select: none;
+  opacity: 0.4;
+}
+
+.drag-handle:active { cursor: grabbing; }
+
+/* sortMode !== manual のときハンドル非表示 */
+body.sort-auto .drag-handle { display: none; }

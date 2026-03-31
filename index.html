@@ -58,6 +58,7 @@
   <template id="task-template">
     <li class="task-item" data-id="">
       <div class="task-row">
+        <span class="drag-handle" aria-hidden="true">⠿</span>
         <button class="collapse-btn" aria-label="折りたたみ">▶</button>
         <button class="done-btn" aria-label="完了"></button>
         <span class="task-text"></span>
@@ -74,6 +75,7 @@
     <button id="ctx-cancel">キャンセル</button>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1/Sortable.min.js"></script>
   <script type="module" src="app.js"></script>
 </body>
 </html>
