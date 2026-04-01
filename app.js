@@ -94,16 +94,41 @@ async function loadTasks() {
 }
 
 // ===== 手動並び順（localStorage） =====
+
+// Merges a new visible order into an existing stored order.
+// Hidden items (in existing but not visible) stay in their relative positions.
+// New visible items not yet in existing are appended at the end.
+function mergeOrder(existingIds, visibleIds) {
+  const visibleSet = new Set(visibleIds)
+  const visibleQueue = [...visibleIds]
+  const result = []
+  for (const id of existingIds) {
+    if (visibleSet.has(id)) {
+      result.push(visibleQueue.shift())
+    } else {
+      result.push(id)
+    }
+  }
+  result.push(...visibleQueue)
+  return result
+}
+
 function saveManualOrder() {
-  const order = {}
-  order['root'] = [...taskList.querySelectorAll(':scope > .task-item')].map(li => li.dataset.id)
+  const existing = JSON.parse(localStorage.getItem('taskOrder') || '{}')
+  const newOrder = { ...existing }
+
+  const visibleRootIds = [...taskList.querySelectorAll(':scope > .task-item')].map(li => li.dataset.id)
+  newOrder['root'] = mergeOrder(existing['root'] || [], visibleRootIds)
+
   document.querySelectorAll('.subtask-list').forEach(ul => {
     const parentId = ul.closest('.task-item')?.dataset.id
     if (parentId) {
-      order[parentId] = [...ul.querySelectorAll(':scope > .task-item')].map(li => li.dataset.id)
+      const visibleChildIds = [...ul.querySelectorAll(':scope > .task-item')].map(li => li.dataset.id)
+      newOrder[parentId] = mergeOrder(existing[parentId] || [], visibleChildIds)
     }
   })
-  localStorage.setItem('taskOrder', JSON.stringify(order))
+
+  localStorage.setItem('taskOrder', JSON.stringify(newOrder))
 }
 
 function applyManualOrder(nodes) {
@@ -148,6 +173,8 @@ function handleDragEnd(evt) {
 }
 
 function attachSortable(ul) {
+  const existing = Sortable.get(ul)
+  if (existing) existing.destroy()
   Sortable.create(ul, {
     group: 'tasks',
     handle: '.drag-handle',
