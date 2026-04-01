@@ -25,6 +25,7 @@ const contextMenu = document.getElementById('context-menu')
 const ctxSubtask = document.getElementById('ctx-subtask')
 const ctxDelete = document.getElementById('ctx-delete')
 const ctxCancel = document.getElementById('ctx-cancel')
+const ctxEdit = document.getElementById('ctx-edit')
 
 // ===== 初期化 =====
 async function init() {
@@ -244,6 +245,50 @@ hideDoneToggle.addEventListener('change', () => {
   renderTasks()
 })
 
+// ===== テキスト編集 =====
+function startEdit(taskId) {
+  const li = taskList.querySelector(`[data-id="${taskId}"]`)
+  if (!li) return
+  const span = li.querySelector('.task-text')
+  const originalText = span.textContent
+  const input = document.createElement('input')
+  input.className = 'edit-input'
+  input.value = originalText
+  span.replaceWith(input)
+  input.focus()
+  input.select()
+
+  let committed = false
+  function commit() {
+    if (committed) return
+    committed = true
+    const newText = input.value.trim()
+    if (newText && newText !== originalText) {
+      commitEdit(taskId, newText)
+    } else {
+      input.replaceWith(span)
+    }
+  }
+
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); commit() }
+    if (e.key === 'Escape') { committed = true; input.replaceWith(span) }
+  })
+  input.addEventListener('blur', commit)
+}
+
+async function commitEdit(taskId, newText) {
+  try {
+    await updateTask(taskId, { text: newText })
+    const task = state.tasks.find(t => t.id === taskId)
+    if (task) task.text = newText
+    renderTasks()
+  } catch (e) {
+    console.error('編集に失敗しました:', e)
+    renderTasks()
+  }
+}
+
 // ===== コンテキストメニュー =====
 let contextMenuTargetId = null
 
@@ -279,6 +324,13 @@ ctxDelete.addEventListener('click', async () => {
   } catch (e) {
     console.error('削除に失敗しました:', e)
   }
+})
+
+ctxEdit.addEventListener('click', () => {
+  if (!contextMenuTargetId) return
+  const id = contextMenuTargetId
+  closeContextMenu()
+  startEdit(id)
 })
 
 ctxCancel.addEventListener('click', closeContextMenu)

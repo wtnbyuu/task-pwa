@@ -295,3 +295,16 @@ header {
 
 /* sortMode !== manual のときハンドル非表示 */
 body.sort-auto .drag-handle { display: none; }
+
+/* ===== インライン編集 ===== */
+.task-row input.edit-input {
+  flex: 1;
+  font-size: 1rem;
+  padding: 2px 4px;
+  border: 1.5px solid var(--accent);
+  border-radius: 4px;
+  background: var(--bg);
+  color: var(--fg);
+  outline: none;
+  min-width: 0;
+}
