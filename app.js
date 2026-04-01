@@ -93,8 +93,76 @@ async function loadTasks() {
   renderTasks()
 }
 
+// ===== 手動並び順（localStorage） =====
+function saveManualOrder() {
+  const order = {}
+  order['root'] = [...taskList.querySelectorAll(':scope > .task-item')].map(li => li.dataset.id)
+  document.querySelectorAll('.subtask-list').forEach(ul => {
+    const parentId = ul.closest('.task-item')?.dataset.id
+    if (parentId) {
+      order[parentId] = [...ul.querySelectorAll(':scope > .task-item')].map(li => li.dataset.id)
+    }
+  })
+  localStorage.setItem('taskOrder', JSON.stringify(order))
+}
+
+function applyManualOrder(nodes) {
+  const order = JSON.parse(localStorage.getItem('taskOrder') || '{}')
+
+  function sortLevel(tasks, key) {
+    const ids = order[key]
+    if (!ids) return tasks
+    const sorted = ids.map(id => tasks.find(t => t.id === id)).filter(Boolean)
+    const rest = tasks.filter(t => !ids.includes(t.id))
+    return [...sorted, ...rest]
+  }
+
+  function recurse(tasks, key) {
+    return sortLevel(tasks, key).map(task => ({
+      ...task,
+      children: recurse(task.children || [], task.id)
+    }))
+  }
+
+  return recurse(nodes, 'root')
+}
+
+function handleDragEnd(evt) {
+  const itemId = evt.item.dataset.id
+  if (evt.from !== evt.to) {
+    const newParentId = evt.to.id === 'task-list'
+      ? null
+      : evt.to.closest('.task-item')?.dataset.id ?? null
+    updateTask(itemId, { parent_id: newParentId }).then(() => {
+      const task = state.tasks.find(t => t.id === itemId)
+      if (task) task.parent_id = newParentId
+      saveManualOrder()
+      renderTasks()
+    }).catch(e => {
+      console.error('親変更に失敗しました:', e)
+      renderTasks()
+    })
+  } else {
+    saveManualOrder()
+  }
+}
+
+function attachSortable(ul) {
+  Sortable.create(ul, {
+    group: 'tasks',
+    handle: '.drag-handle',
+    animation: 150,
+    fallbackOnBody: true,
+    swapThreshold: 0.65,
+    delayOnTouchOnly: true,
+    delay: 150,
+    onEnd: handleDragEnd,
+  })
+}
+
 // ===== 描画 =====
 function sortTreeNodes(nodes, mode) {
+  if (mode === 'manual') return applyManualOrder(nodes)
   const sorted = applySort(nodes, mode)
   return sorted.map(task => ({
     ...task,
@@ -112,6 +180,11 @@ function renderTasks() {
   const sorted = sortTreeNodes(tree, state.sortMode)
   taskList.innerHTML = ''
   sorted.forEach(task => taskList.appendChild(renderTask(task)))
+
+  if (state.sortMode === 'manual') {
+    attachSortable(taskList)
+    document.querySelectorAll('.subtask-list').forEach(ul => attachSortable(ul))
+  }
 }
 
 function renderFilterBar(categories) {
