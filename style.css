@@ -117,6 +117,9 @@ header {
   flex-shrink: 0;
 }
 
+#app-screen{
+  padding: 10px 1px;
+}
 /* ===== フィルターバー ===== */
 #filter-bar {
   display: flex;
