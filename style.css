@@ -280,7 +280,7 @@ header {
 .drag-handle {
   color: var(--fg2);
   font-size: 1rem;
-  width: 20px;
+  width: var(--tap);
   cursor: grab;
   flex-shrink: 0;
   display: flex;
