@@ -1,5 +1,5 @@
 import { supabase, signInWithEmail, getSession, fetchTasks, addTask, updateTask, deleteTask } from './supabase.js'
-import { parseTag, buildTree, filterTasks, getCategories } from './utils.js'
+import { parseTag, buildTree, filterTasks, getCategories, applySort } from './utils.js'
 
 // ===== 状態 =====
 let state = {
@@ -8,6 +8,7 @@ let state = {
   hideDone: false,        // 完了タスクを非表示
   collapsed: new Set(),   // 折りたたみ中のタスクID
   pendingParentId: null,  // サブタスク追加時の親ID
+  sortMode: localStorage.getItem('sortMode') || 'manual',
 }
 
 // ===== DOM参照 =====
@@ -26,6 +27,8 @@ const ctxSubtask = document.getElementById('ctx-subtask')
 const ctxDelete = document.getElementById('ctx-delete')
 const ctxCancel = document.getElementById('ctx-cancel')
 const ctxEdit = document.getElementById('ctx-edit')
+const sortBtn = document.getElementById('sort-btn')
+const sortMenu = document.getElementById('sort-menu')
 
 // ===== 初期化 =====
 async function init() {
@@ -33,6 +36,7 @@ async function init() {
     navigator.serviceWorker.register('/task-pwa/sw.js').catch(console.error)
   }
 
+  document.body.classList.toggle('sort-auto', state.sortMode !== 'manual')
   const session = await getSession()
   if (session) {
     showApp()
@@ -90,6 +94,14 @@ async function loadTasks() {
 }
 
 // ===== 描画 =====
+function sortTreeNodes(nodes, mode) {
+  const sorted = applySort(nodes, mode)
+  return sorted.map(task => ({
+    ...task,
+    children: sortTreeNodes(task.children || [], mode)
+  }))
+}
+
 function renderTasks() {
   const filtered = filterTasks(state.tasks, state.filter)
   const visible = state.hideDone ? filtered.filter(t => !t.done) : filtered
@@ -97,8 +109,9 @@ function renderTasks() {
   renderFilterBar(getCategories(state.tasks))
 
   const tree = buildTree(visible)
+  const sorted = sortTreeNodes(tree, state.sortMode)
   taskList.innerHTML = ''
-  tree.forEach(task => taskList.appendChild(renderTask(task)))
+  sorted.forEach(task => taskList.appendChild(renderTask(task)))
 }
 
 function renderFilterBar(categories) {
@@ -243,6 +256,31 @@ async function handleToggleDone(task) {
 hideDoneToggle.addEventListener('change', () => {
   state.hideDone = hideDoneToggle.checked
   renderTasks()
+})
+
+// ===== ソート =====
+sortBtn.addEventListener('click', e => {
+  e.stopPropagation()
+  sortMenu.classList.toggle('hidden')
+  sortMenu.querySelectorAll('.sort-option').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.sort === state.sortMode)
+  })
+})
+
+sortMenu.querySelectorAll('.sort-option').forEach(btn => {
+  btn.addEventListener('click', () => {
+    state.sortMode = btn.dataset.sort
+    localStorage.setItem('sortMode', state.sortMode)
+    sortMenu.classList.add('hidden')
+    document.body.classList.toggle('sort-auto', state.sortMode !== 'manual')
+    renderTasks()
+  })
+})
+
+document.addEventListener('click', e => {
+  if (!sortMenu.classList.contains('hidden') && !sortMenu.contains(e.target) && e.target !== sortBtn) {
+    sortMenu.classList.add('hidden')
+  }
 })
 
 // ===== テキスト編集 =====

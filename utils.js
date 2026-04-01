@@ -49,3 +49,17 @@ export function getCategories(tasks) {
   const set = new Set(tasks.map(t => t.category).filter(Boolean))
   return [...set]
 }
+
+/**
+ * タスク配列をモードに従ってソートする（非破壊）
+ * @param {Array} tasks
+ * @param {'manual'|'date-asc'|'date-desc'|'done'|'alpha'} mode
+ * @returns {Array}
+ */
+export function applySort(tasks, mode) {
+  if (mode === 'date-asc')  return [...tasks].sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
+  if (mode === 'date-desc') return [...tasks].sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+  if (mode === 'done')      return [...tasks].sort((a, b) => (a.done ? 1 : 0) - (b.done ? 1 : 0))
+  if (mode === 'alpha')     return [...tasks].sort((a, b) => a.text.localeCompare(b.text, 'ja'))
+  return tasks // 'manual'
+}

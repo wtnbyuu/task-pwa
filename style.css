@@ -308,3 +308,45 @@ body.sort-auto .drag-handle { display: none; }
   outline: none;
   min-width: 0;
 }
+
+/* ===== ソートボタン・メニュー ===== */
+#sort-btn {
+  margin-left: auto;
+  background: none;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--fg2);
+  font-size: 1rem;
+  padding: 4px 10px;
+  cursor: pointer;
+  min-height: var(--tap);
+}
+
+#sort-menu {
+  display: flex;
+  gap: 6px;
+  padding: 6px 12px 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg2);
+}
+#sort-menu::-webkit-scrollbar { display: none; }
+
+.sort-option {
+  padding: 5px 14px;
+  border-radius: 999px;
+  border: 1.5px solid var(--border);
+  background: var(--bg);
+  color: var(--fg2);
+  font-size: 0.875rem;
+  cursor: pointer;
+  white-space: nowrap;
+  min-height: var(--tap);
+}
+
+.sort-option.active {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}

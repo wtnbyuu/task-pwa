@@ -49,6 +49,14 @@
           <input type="checkbox" id="hide-done-toggle">
           完了を非表示
         </label>
+        <button id="sort-btn">⇅</button>
+      </div>
+      <div id="sort-menu" class="hidden">
+        <button class="sort-option active" data-sort="manual">手動</button>
+        <button class="sort-option" data-sort="date-desc">新しい順</button>
+        <button class="sort-option" data-sort="date-asc">古い順</button>
+        <button class="sort-option" data-sort="done">完了/TODO</button>
+        <button class="sort-option" data-sort="alpha">ABC順</button>
       </div>
       <ul id="task-list"></ul>
     </main>
