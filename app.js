@@ -6,7 +6,7 @@ let state = {
   tasks: [],              // DBから取得したフラットなタスク一覧
   filter: null,           // 現在のカテゴリフィルター（nullは全て）
   hideDone: false,        // 完了タスクを非表示
-  collapsed: new Set(),   // 折りたたみ中のタスクID
+  expanded: new Set(),    // 展開中のタスクID
   pendingParentId: null,  // サブタスク追加時の親ID
   sortMode: localStorage.getItem('sortMode') || 'manual',
 }
@@ -250,20 +250,20 @@ function renderTask(task) {
   if (!task.children || task.children.length === 0) {
     collapseBtn.dataset.noChildren = '1'
   } else {
-    const isCollapsed = state.collapsed.has(task.id)
-    if (!isCollapsed) collapseBtn.classList.add('expanded')
-    subtaskList.classList.toggle('hidden', isCollapsed)
+    const isExpanded = state.expanded.has(task.id)
+    if (isExpanded) collapseBtn.classList.add('expanded')
+    subtaskList.classList.toggle('hidden', !isExpanded)
     task.children.forEach(child => subtaskList.appendChild(renderTask(child)))
 
     collapseBtn.addEventListener('click', () => {
-      if (state.collapsed.has(task.id)) {
-        state.collapsed.delete(task.id)
-        collapseBtn.classList.add('expanded')
-        subtaskList.classList.remove('hidden')
-      } else {
-        state.collapsed.add(task.id)
+      if (state.expanded.has(task.id)) {
+        state.expanded.delete(task.id)
         collapseBtn.classList.remove('expanded')
         subtaskList.classList.add('hidden')
+      } else {
+        state.expanded.add(task.id)
+        collapseBtn.classList.add('expanded')
+        subtaskList.classList.remove('hidden')
       }
     })
   }
