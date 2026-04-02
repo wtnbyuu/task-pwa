@@ -29,6 +29,8 @@ const ctxCancel = document.getElementById('ctx-cancel')
 const ctxEdit = document.getElementById('ctx-edit')
 const sortBtn = document.getElementById('sort-btn')
 const sortMenu = document.getElementById('sort-menu')
+const csvBtn = document.getElementById('csv-btn')
+const csvInput = document.getElementById('csv-input')
 
 // ===== 初期化 =====
 async function init() {
@@ -150,6 +152,39 @@ function applyManualOrder(nodes) {
   }
 
   return recurse(nodes, 'root')
+}
+
+// ===== CSV パース =====
+// 各行のテキストとインデント深さ（2スペース or タブ = 1段階）を返す
+function parseCsvLines(text) {
+  return text
+    .split('\n')
+    .map(line => {
+      const normalized = line.replace(/\t/g, '  ')
+      const depth = Math.floor((normalized.match(/^( *)/)[1].length) / 2)
+      const raw = normalized.trim()
+      return { raw, depth }
+    })
+    .filter(({ raw }) => raw.length > 0)
+}
+
+async function importCsvText(text) {
+  const lines = parseCsvLines(text)
+  const parentStack = [] // { depth, id }
+
+  for (const { raw, depth } of lines) {
+    // pop stack entries at same depth or deeper
+    while (parentStack.length > 0 && parentStack[parentStack.length - 1].depth >= depth) {
+      parentStack.pop()
+    }
+    const parent_id = parentStack.length > 0 ? parentStack[parentStack.length - 1].id : null
+    const { text: taskText, category } = parseTag(raw)
+    const task = await addTask({ text: taskText, category, parent_id })
+    state.tasks.push(task)
+    parentStack.push({ depth, id: task.id })
+  }
+
+  renderTasks()
 }
 
 function handleDragEnd(evt) {
@@ -477,6 +512,17 @@ document.addEventListener('click', e => {
   if (!contextMenu.classList.contains('hidden') && !contextMenu.contains(e.target)) {
     closeContextMenu()
   }
+})
+
+// ===== CSV インポート =====
+csvBtn.addEventListener('click', () => csvInput.click())
+
+csvInput.addEventListener('change', async () => {
+  const file = csvInput.files[0]
+  if (!file) return
+  const text = await file.text()
+  csvInput.value = ''
+  await importCsvText(text)
 })
 
 init()
