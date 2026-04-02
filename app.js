@@ -172,19 +172,24 @@ async function importCsvText(text) {
   const lines = parseCsvLines(text)
   const parentStack = [] // { depth, id }
 
-  for (const { raw, depth } of lines) {
-    // pop stack entries at same depth or deeper
-    while (parentStack.length > 0 && parentStack[parentStack.length - 1].depth >= depth) {
-      parentStack.pop()
+  try {
+    for (const { raw, depth } of lines) {
+      // pop stack entries at same depth or deeper
+      while (parentStack.length > 0 && parentStack[parentStack.length - 1].depth >= depth) {
+        parentStack.pop()
+      }
+      const parent_id = parentStack.length > 0 ? parentStack[parentStack.length - 1].id : null
+      const { text: taskText, category } = parseTag(raw)
+      const task = await addTask({ text: taskText, category, parent_id })
+      state.tasks.push(task)
+      parentStack.push({ depth, id: task.id })
     }
-    const parent_id = parentStack.length > 0 ? parentStack[parentStack.length - 1].id : null
-    const { text: taskText, category } = parseTag(raw)
-    const task = await addTask({ text: taskText, category, parent_id })
-    state.tasks.push(task)
-    parentStack.push({ depth, id: task.id })
+  } catch (err) {
+    console.error('CSV import error:', err)
+    alert('CSVのインポート中にエラーが発生しました。一部のタスクが保存されていない可能性があります。')
+  } finally {
+    renderTasks()
   }
-
-  renderTasks()
 }
 
 function handleDragEnd(evt) {
