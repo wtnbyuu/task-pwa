@@ -168,6 +168,7 @@ function parseCsvLines(text) {
     .filter(({ raw }) => raw.length > 0)
 }
 
+// CSVテキストをパースして各行をタスクとして追加し、画面を再描画する
 async function importCsvText(text) {
   const lines = parseCsvLines(text)
   const parentStack = [] // { depth, id }
